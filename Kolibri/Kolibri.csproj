@@ -38,7 +38,7 @@
       <HintPath>..\packages\Mono.Cecil.0.9.6.4\lib\net35\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil.Inject">
-      <HintPath>.\Mono.Cecil.Inject.dll</HintPath>
+      <HintPath>..\..\..\Kolibri\Kolibri\Assemblies\Mono.Cecil.Inject.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil.Mdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.9.6.4\lib\net35\Mono.Cecil.Mdb.dll</HintPath>
@@ -77,6 +77,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assemblies\Mono.Cecil.Inject.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
