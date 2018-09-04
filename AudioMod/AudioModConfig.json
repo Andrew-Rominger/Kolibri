@@ -1,0 +1,7 @@
+{
+	"Volume" : 1.0,
+	"TakeMusicFadeTime" : 3.0,
+	"HoldMusicFadeTime": 3.0,
+	"TakeSongFileName" : "AmbientMusic.mp3",
+	"HoldSongFileName": "HoldSong.mp3"
+}
