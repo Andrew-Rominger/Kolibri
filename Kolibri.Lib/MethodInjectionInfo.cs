@@ -1,4 +1,4 @@
-﻿namespace Kolibri
+﻿namespace Kolibri.Lib
 {
     public class MethodInjectionInfo
     {

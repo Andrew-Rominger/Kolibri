@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Kolibri
+namespace Kolibri.Lib
 {
     public class Mod
     {

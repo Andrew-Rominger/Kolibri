@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Kolibri
+namespace Kolibri.Lib
 {
     public class ModManager : IEnumerable<Mod>
     {

@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioMod", "AudioMod\AudioMod.csproj", "{1FEFD601-0E18-4772-85CC-FE6D4F322FC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kolibri.Lib", "Kolibri.Lib\Kolibri.Lib.csproj", "{A219D507-995B-4A86-9E9A-3E3B4860CB09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kolibri", "Kolibri\Kolibri.csproj", "{65BD5D7F-4DF0-4883-825C-3EBB86A4EB47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kolibri.Inject", "Kolibri.Inject\Kolibri.Inject.csproj", "{BCFFC6A5-9000-4199-B43C-C38814EAF365}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1FEFD601-0E18-4772-85CC-FE6D4F322FC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1FEFD601-0E18-4772-85CC-FE6D4F322FC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1FEFD601-0E18-4772-85CC-FE6D4F322FC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1FEFD601-0E18-4772-85CC-FE6D4F322FC7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{65BD5D7F-4DF0-4883-825C-3EBB86A4EB47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{65BD5D7F-4DF0-4883-825C-3EBB86A4EB47}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{65BD5D7F-4DF0-4883-825C-3EBB86A4EB47}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{65BD5D7F-4DF0-4883-825C-3EBB86A4EB47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A219D507-995B-4A86-9E9A-3E3B4860CB09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A219D507-995B-4A86-9E9A-3E3B4860CB09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A219D507-995B-4A86-9E9A-3E3B4860CB09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A219D507-995B-4A86-9E9A-3E3B4860CB09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCFFC6A5-9000-4199-B43C-C38814EAF365}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCFFC6A5-9000-4199-B43C-C38814EAF365}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCFFC6A5-9000-4199-B43C-C38814EAF365}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCFFC6A5-9000-4199-B43C-C38814EAF365}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

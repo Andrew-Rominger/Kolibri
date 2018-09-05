@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Kolibri
+namespace Kolibri.Lib
 {
     public class InjectMethodAttribute : Attribute
     {

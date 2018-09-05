@@ -1,12 +1,13 @@
 ﻿using System;
 using System.IO;
+using Kolibri.Lib;
 using Newtonsoft.Json;
 
-namespace Kolibri
+namespace Kolibri.Inject
 {
-    public class Program
+    class Program
     {
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
             var configFile = new FileInfo("config.json");
             if (configFile.Exists)
@@ -21,7 +22,7 @@ namespace Kolibri
                 injector.Inject();
             }
             Console.WriteLine("Done. Press any key to exit...");
-           
+            Console.ReadLine();
         }
     }
 }

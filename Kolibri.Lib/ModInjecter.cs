@@ -5,7 +5,7 @@ using System.Reflection;
 using Mono.Cecil;
 using Mono.Cecil.Inject;
 
-namespace Kolibri
+namespace Kolibri.Lib
 {
     public class ModInjecter
     {
