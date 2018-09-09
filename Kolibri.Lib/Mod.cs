@@ -14,7 +14,7 @@ namespace Kolibri.Lib
         public Mod(FileInfo modAssemblyFile)
         {
             ModAssemblyFile = modAssemblyFile;
-            ModDependencyDirectory = ModAssemblyFile.Directory.GetDirectories("Dependencies").Single();
+            ModDependencyDirectory = ModAssemblyFile.Directory.GetDirectories("Dependencies").SingleOrDefault();
             LoadMod();
         }
 
@@ -33,7 +33,9 @@ namespace Kolibri.Lib
                     ModMethodInjections.Add(new MethodInjectionInfo()
                     {
                         SourceMethod = new InjectionLocation(method.DeclaringType.FullName, method.Name),
-                        TargetMethod = new InjectionLocation(attribute.InjectionLocation.FullName, attribute.InjectionMethod)
+                        TargetMethod = new InjectionLocation(attribute.InjectionLocation.FullName, attribute.InjectionMethod),
+                        InjectionLocation = attribute.MethodInjectionLocation,
+                        InjectFlags = attribute.InjectFlags
                     });
                 }
             }

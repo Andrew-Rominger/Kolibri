@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -49,6 +50,7 @@ namespace Kolibri.Lib
             LoadUnityAssemblies();
             foreach (var modAssembly in _modAssemblies)
             {
+                Console.WriteLine($"Loading {modAssembly.Name}");
                 _modManager.AddMod(new Mod(modAssembly));
             }
         }
@@ -65,32 +67,27 @@ namespace Kolibri.Lib
 
             foreach (var mod in _modManager)
             {
+                
                 var modAssembly = AssemblyDefinition.ReadAssembly(mod.ModAssemblyFile.FullName, new ReaderParameters(){AssemblyResolver = _resolver});
                    
                 foreach (var methodInjection in mod.ModMethodInjections)
                 {
                     var toInject = modAssembly.MainModule.GetType(methodInjection.SourceMethod.InjectionType).Methods.Single(m => m.Name == methodInjection.SourceMethod.InjectionMethod);
                     var injectionLocation = gameAssembly.MainModule.GetType(methodInjection.TargetMethod.InjectionType).GetMethod(methodInjection.TargetMethod.InjectionMethod);
-                    var firstParamType = toInject.Parameters.First().ParameterType;
-                    var injectiontype = gameAssembly.MainModule.GetType(methodInjection.TargetMethod.InjectionType);
-                    if (firstParamType.FullName == injectiontype.FullName)
-                    {
-                        var injector = new InjectionDefinition(injectionLocation, toInject, InjectFlags.PassInvokingInstance);
-                        injector.Inject(injectionLocation.Body.Instructions.First());
-                    }
-                    else
-                    {
-                        var injector = new InjectionDefinition(injectionLocation, toInject, InjectFlags.PassParametersVal);
-                        injector.Inject(injectionLocation.Body.Instructions.First());
-                    }
+                    var injector = new InjectionDefinition(injectionLocation, toInject, methodInjection.InjectFlags);
+                    injector.Inject(methodInjection.InjectionLocation == MethodInjectionInfo.MethodInjectionLocation.Top ? injectionLocation.Body.Instructions.First() : injectionLocation.Body.Instructions.Last());
                 }
                 File.Copy(mod.ModAssemblyFile.FullName, Path.Combine(_gameDirectory.FullName, mod.ModAssemblyFile.Name), true);
                 File.Copy(mod.ModAssemblyFile.FullName, Path.Combine(_gameAssemblyDirectory.FullName, mod.ModAssemblyFile.Name), true);
-                foreach (var file in mod.ModDependencyDirectory.GetFiles())
+                if (mod.ModDependencyDirectory != null)
                 {
-                    File.Copy(file.FullName, Path.Combine(_gameDirectory.FullName, file.Name), true);
-                    File.Copy(file.FullName, Path.Combine(_gameAssemblyDirectory.FullName, file.Name), true);
+                    foreach (var file in mod.ModDependencyDirectory.GetFiles())
+                    {
+                        File.Copy(file.FullName, Path.Combine(_gameDirectory.FullName, file.Name), true);
+                        File.Copy(file.FullName, Path.Combine(_gameAssemblyDirectory.FullName, file.Name), true);
+                    }
                 }
+               
             }
             gameAssembly.Write(_gameAssemblyFile.FullName);
         }
