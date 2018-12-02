@@ -24,7 +24,7 @@ namespace Kolibri.Lib
             _modDirectories = _gameDirectory.GetDirectories("Mods").Single().GetDirectories();
             foreach (var modDirectory in _modDirectories)
             {
-                _modAssemblies.AddRange(modDirectory.GetFiles("*.dll"));
+                _modAssemblies.AddRange(modDirectory.GetFiles($"{modDirectory.Name}.dll"));
             }
             
             _gameAssemblyDirectory = _gameDirectory
