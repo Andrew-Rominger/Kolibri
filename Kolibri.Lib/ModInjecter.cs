@@ -74,6 +74,7 @@ namespace Kolibri.Lib
         {
             Assembly.LoadFrom(_backupGameAssemblyFile.FullName);
             Assembly.LoadFrom(Path.Combine(_backupGameAssemblyFile.DirectoryName, "UnityEngine.dll"));
+            
         }
 
         public void Inject()
@@ -92,18 +93,47 @@ namespace Kolibri.Lib
                         .GetType(methodInjection.SourceMethod.InjectionType)
                         .Methods
                         .Single(m => m.Name == methodInjection.SourceMethod.InjectionMethod);
+                    if (methodInjection.InjectionAssembly != null)
+                    {
+                        var injectPath = new FileInfo(Path.Combine(_gameAssemblyFile.Directory.FullName,
+                            methodInjection.InjectionAssembly));
+                        var tempFil = new FileInfo(Path.Combine(injectPath.DirectoryName, injectPath.Name+ "_temp.dll"));
+                        var tempFil2 = new FileInfo(Path.Combine(injectPath.DirectoryName, injectPath.Name+ "_temp2.dll"));
+                        File.Copy(injectPath.FullName, tempFil.FullName, true);
 
-                    var injectionLocation = gameAssembly
-                        .MainModule
-                        .GetType(methodInjection.TargetMethod.InjectionType)
-                        .GetMethod(methodInjection.TargetMethod.InjectionMethod);
+                        var injectTargetAssembly = AssemblyDefinition.ReadAssembly(tempFil.FullName,new ReaderParameters { AssemblyResolver = _resolver });
 
-                    var injector = new InjectionDefinition(injectionLocation, toInject, methodInjection.InjectFlags);
+                        
+                        var injectionLocation = injectTargetAssembly
+                            .MainModule
+                            .GetType(methodInjection.TargetMethod.InjectionType)
+                            .GetMethod(methodInjection.TargetMethod.InjectionMethod);
 
-                    injector
-                        .Inject(methodInjection.InjectionLocation == MethodInjectionInfo.MethodInjectionLocation.Top
-                               ? injectionLocation.Body.Instructions.First()
-                               : injectionLocation.Body.Instructions.Last());
+                        var injector = new InjectionDefinition(injectionLocation, toInject, methodInjection.InjectFlags);
+
+                        injector
+                            .Inject(methodInjection.InjectionLocation == MethodInjectionInfo.MethodInjectionLocation.Top
+                                ? injectionLocation.Body.Instructions.First()
+                                : injectionLocation.Body.Instructions.Last());
+                        injectTargetAssembly.Write(tempFil2.FullName);
+
+                    }
+                    else
+                    {
+                        var injectionLocation = gameAssembly
+                            .MainModule
+                            .GetType(methodInjection.TargetMethod.InjectionType)
+                            .GetMethod(methodInjection.TargetMethod.InjectionMethod);
+
+                        var injector = new InjectionDefinition(injectionLocation, toInject, methodInjection.InjectFlags);
+
+                        injector
+                            .Inject(methodInjection.InjectionLocation == MethodInjectionInfo.MethodInjectionLocation.Top
+                                ? injectionLocation.Body.Instructions.First()
+                                : injectionLocation.Body.Instructions.Last());
+                    }
+                   
+                   
                 }
                 File.Copy(mod.ModAssemblyFile.FullName, Path.Combine(_gameDirectory.FullName, mod.ModAssemblyFile.Name), true);
                 File.Copy(mod.ModAssemblyFile.FullName, Path.Combine(_gameAssemblyDirectory.FullName, mod.ModAssemblyFile.Name), true);
@@ -111,8 +141,16 @@ namespace Kolibri.Lib
                 {
                     foreach (var file in mod.ModDependencyDirectory.GetFiles())
                     {
-                        File.Copy(file.FullName, Path.Combine(_gameDirectory.FullName, file.Name), true);
-                        File.Copy(file.FullName, Path.Combine(_gameAssemblyDirectory.FullName, file.Name), true);
+                        try
+                        {
+                            File.Copy(file.FullName, Path.Combine(_gameDirectory.FullName, file.Name), true);
+                            File.Copy(file.FullName, Path.Combine(_gameAssemblyDirectory.FullName, file.Name), true);
+                        }
+                        catch (Exception e)
+                        {
+                           Console.WriteLine($"Unable to copy {file.Name}, probally already there. Skipping...");
+                        }
+                        
                     }
                 }
                

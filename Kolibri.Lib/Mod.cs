@@ -20,11 +20,38 @@ namespace Kolibri.Lib
 
         private void LoadMod()
         {
+            var gameDir = new DirectoryInfo(Path.Combine(ModAssemblyFile.Directory.Parent.Parent.GetDirectories("*_Data")[0].FullName, "managed"));
             _modAssembly = Assembly.LoadFrom(ModAssemblyFile.FullName);
-            var methodsToInject = _modAssembly.GetTypes()
+            var refAssemblies = _modAssembly.GetReferencedAssemblies().Where(a => a.Name != "mscorlib" && a.Name != "Kolibri.Lib" && a.Name != "Mono.Cecil.Inject");
+            foreach (var referencedAssembly in refAssemblies)
+            {
+                var path = new FileInfo(Path.Combine(gameDir.FullName, referencedAssembly.Name + ".dll"));
+                if (path.Exists)
+                {
+                    Assembly.LoadFrom(path.FullName);
+                    continue;
+                    
+                }
+                else
+                {
+                    var modRefDep = ModDependencyDirectory.GetFiles(path.Name)[0];
+                    if (modRefDep != null)
+                    {
+                        Assembly.LoadFrom(modRefDep.FullName);
+                        continue;
+                    }
+                }
+                throw new FileNotFoundException($"Unable to find {referencedAssembly.Name}. Add it to dependencies folder");
+            }
+
+            var definedTypes = _modAssembly.GetExportedTypes();
+
+            var methodsToInject = definedTypes
                 .SelectMany(t => t.GetMethods())
+                .Where(info => info.DeclaringType.Assembly.FullName == _modAssembly.FullName)
                 .Where(m => m.GetCustomAttributes(typeof(InjectMethodAttribute), false).Any())
                 .ToList();
+
             foreach (var method in methodsToInject)
             {
                 var injecetAttr = (InjectMethodAttribute[]) method.GetCustomAttributes(typeof(InjectMethodAttribute), false);
@@ -35,7 +62,8 @@ namespace Kolibri.Lib
                         SourceMethod = new InjectionLocation(method.DeclaringType.FullName, method.Name),
                         TargetMethod = new InjectionLocation(attribute.InjectionLocation.FullName, attribute.InjectionMethod),
                         InjectionLocation = attribute.MethodInjectionLocation,
-                        InjectFlags = attribute.InjectFlags
+                        InjectFlags = attribute.InjectFlags,
+                        InjectionAssembly = attribute.InjectionAssembly
                     });
                 }
             }

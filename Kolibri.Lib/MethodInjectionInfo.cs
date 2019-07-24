@@ -13,6 +13,7 @@ namespace Kolibri.Lib
         public InjectionLocation SourceMethod { get; set; }
         public MethodInjectionLocation InjectionLocation { get; set; }
         public InjectFlags InjectFlags { get; set; }
+        public string InjectionAssembly { get; set; }
         
     }
 }
