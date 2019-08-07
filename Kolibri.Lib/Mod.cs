@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -7,12 +8,22 @@ namespace Kolibri.Lib
 {
     public class Mod
     {
+        private readonly DirectoryInfo _gameDirectory;
+        private readonly DirectoryInfo _dataDir;
+        private readonly DirectoryInfo _managedDirectory;
         public FileInfo ModAssemblyFile { get; set; }
         public DirectoryInfo ModDependencyDirectory { get; set; }
         private Assembly _modAssembly;
         public List<MethodInjectionInfo> ModMethodInjections { get; } = new List<MethodInjectionInfo>();
-        public Mod(FileInfo modAssemblyFile)
+        public Mod(FileInfo modAssemblyFile, DirectoryInfo gameDirectory)
         {
+            _gameDirectory = gameDirectory;
+            _dataDir = _gameDirectory.GetDirectories("*_Data").FirstOrDefault();
+            if(_dataDir == null || !_dataDir.Exists)
+                throw new Exception("Could not find _Data dir");
+            _managedDirectory = _dataDir.GetDirectories("Managed").FirstOrDefault();
+            if (_managedDirectory == null || !_managedDirectory.Exists)
+                throw new Exception("Could not find Managed folder inside _Data dir");
             ModAssemblyFile = modAssemblyFile;
             ModDependencyDirectory = ModAssemblyFile.Directory.GetDirectories("Dependencies").SingleOrDefault();
             LoadMod();
@@ -20,12 +31,13 @@ namespace Kolibri.Lib
 
         private void LoadMod()
         {
-            var gameDir = new DirectoryInfo(Path.Combine(ModAssemblyFile.Directory.Parent.Parent.GetDirectories("*_Data")[0].FullName, "managed"));
+            Console.WriteLine($"Loading {ModAssemblyFile.Name}");
             _modAssembly = Assembly.LoadFrom(ModAssemblyFile.FullName);
+            Console.WriteLine($"\tLoading dependencies");
             var refAssemblies = _modAssembly.GetReferencedAssemblies().Where(a => a.Name != "mscorlib" && a.Name != "Kolibri.Lib" && a.Name != "Mono.Cecil.Inject");
             foreach (var referencedAssembly in refAssemblies)
             {
-                var path = new FileInfo(Path.Combine(gameDir.FullName, referencedAssembly.Name + ".dll"));
+                var path = new FileInfo(Path.Combine(_managedDirectory.FullName, referencedAssembly.Name + ".dll"));
                 if (path.Exists)
                 {
                     Assembly.LoadFrom(path.FullName);
@@ -46,6 +58,7 @@ namespace Kolibri.Lib
 
             var definedTypes = _modAssembly.GetExportedTypes();
 
+            Console.WriteLine($"\tFinding injection methods");
             var methodsToInject = definedTypes
                 .SelectMany(t => t.GetMethods())
                 .Where(info => info.DeclaringType.Assembly.FullName == _modAssembly.FullName)

@@ -21,14 +21,24 @@ namespace Kolibri.Lib
         public ModInjecter(string gameDirectory)
         {
             _gameDirectory = new DirectoryInfo(gameDirectory);
-            var modDirectories = _gameDirectory
-                .GetDirectories("Mods")
-                .Single()
+
+            var modDir = new DirectoryInfo(Path.Combine(_gameDirectory.FullName, "Mods"));
+
+            if (!modDir.Exists)
+                throw new Exception($"Unable to find a Mods folder in {modDir.FullName}");
+
+            var modDirectories = modDir
                 .GetDirectories();
+
+            if(!modDirectories.Any())
+                throw new Exception($"No mod folders found in {modDir.FullName}");
 
             foreach (var modDirectory in modDirectories)
             {
-                _modAssemblies.AddRange(modDirectory.GetFiles($"{modDirectory.Name}.dll"));
+                var modAssembly = modDirectory.GetFiles($"{modDirectory.Name}.dll").SingleOrDefault();
+                if(modAssembly == null || !modAssembly.Exists)
+                    throw new FileNotFoundException($"Could not find the mod file for {modDirectory.FullName}");
+                _modAssemblies.Add(modAssembly);
             }
             
             _gameAssemblyDirectory = _gameDirectory
@@ -55,9 +65,9 @@ namespace Kolibri.Lib
                 var gameAssembly = AssemblyDefinition.ReadAssembly(_gameAssemblyFile.FullName,
                     new ReaderParameters() {AssemblyResolver = _resolver});
                 gameAssembly.Write(_backupGameAssemblyFile.FullName);
+                
             }
-
-            if (_backupGameAssemblyFile.Exists)
+            else
             {
                 File.Copy(_backupGameAssemblyFile.FullName, _gameAssemblyFile.FullName, true);
             }
@@ -65,25 +75,30 @@ namespace Kolibri.Lib
             LoadUnityAssemblies();
             foreach (var modAssembly in _modAssemblies)
             {
-                Console.WriteLine($"Loading {modAssembly.Name}");
-                _modManager.AddMod(new Mod(modAssembly));
+                _modManager.AddMod(new Mod(modAssembly,_gameDirectory));
             }
+
+            Console.WriteLine($"***************************************");
+            Console.WriteLine($"Done loading mods. Ready to inject");
+            Console.WriteLine($"***************************************");
         }
 
         private void LoadUnityAssemblies()
         {
             Assembly.LoadFrom(_backupGameAssemblyFile.FullName);
-            Assembly.LoadFrom(Path.Combine(_backupGameAssemblyFile.DirectoryName, "UnityEngine.dll"));
+            Assembly.LoadFrom(Path.Combine(_gameAssemblyFile.DirectoryName, "UnityEngine.dll"));
             
         }
 
         public void Inject()
         {
+            Console.WriteLine("Beginning inject\n");
             var gameAssembly = AssemblyDefinition.ReadAssembly(_backupGameAssemblyFile.FullName,new ReaderParameters() {AssemblyResolver = _resolver});
 
             foreach (var mod in _modManager)
             {
-                
+                Console.WriteLine($"\t_______________________________________________\n");
+                Console.Write($"\tInjecting {Path.GetFileNameWithoutExtension(mod.ModAssemblyFile.Name)}...");
                 var modAssembly = AssemblyDefinition.ReadAssembly(mod.ModAssemblyFile.FullName, new ReaderParameters(){AssemblyResolver = _resolver});
                    
                 foreach (var methodInjection in mod.ModMethodInjections)
@@ -132,9 +147,8 @@ namespace Kolibri.Lib
                                 ? injectionLocation.Body.Instructions.First()
                                 : injectionLocation.Body.Instructions.Last());
                     }
-                   
-                   
                 }
+                Console.WriteLine($"Done.\n\tCopying Dependencies");
                 File.Copy(mod.ModAssemblyFile.FullName, Path.Combine(_gameDirectory.FullName, mod.ModAssemblyFile.Name), true);
                 File.Copy(mod.ModAssemblyFile.FullName, Path.Combine(_gameAssemblyDirectory.FullName, mod.ModAssemblyFile.Name), true);
                 if (mod.ModDependencyDirectory != null)
@@ -148,15 +162,17 @@ namespace Kolibri.Lib
                         }
                         catch (Exception e)
                         {
-                           Console.WriteLine($"Unable to copy {file.Name}, probally already there. Skipping...");
+                           Console.WriteLine($"\t\tUnable to copy {file.Name}, probally already there. Skipping...");
                         }
                         
                     }
                 }
-               
+                Console.WriteLine($"\t_______________________________________________\n");
             }
+            Console.WriteLine($"***************************************");
+            Console.WriteLine($"Done injecting. Ready to write modified assembly");
+            Console.WriteLine($"***************************************");
             gameAssembly.Write(_gameAssemblyFile.FullName);
         }
-
     }
 }
